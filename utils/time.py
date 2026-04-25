@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import inspect
 import time
+from inspect import Parameter
 from types import TracebackType
 from typing import Any, Callable
 
@@ -55,17 +56,29 @@ def timeit(
 ) -> Callable[..., Any]:
     def wrapper(func: Callable[..., Any]) -> Callable[..., Any]:
         signature = inspect.signature(func)
-        params = ", ".join(signature.parameters.keys())
+
+        namespace = {"Stopwatch": Stopwatch, "func": func, "logger": logger}
+        params = []
+
+        for k, p in signature.parameters.items():
+            if p.default is Parameter.empty:
+                params.append(k)
+            else:
+                namespace[f"{k}_default"] = p.default
+                params.append(f"{k} = {k}_default")
+
+        params = ", ".join(params)
+        assigns = ", ".join(signature.parameters.keys())
+
         code = (
             f"def wrapper({params}):\n"
             + "    with Stopwatch(func.__name__, logger):\n"
             + f"        if {loops > 1}:\n"
             + f"            for _ in range({loops - 1}):\n"
-            + f"                func({params})\n"
+            + f"                func({assigns})\n"
             + "\n"
-            + f"        return func({params})"
+            + f"        return func({assigns})"
         )
-        namespace = {"Stopwatch": Stopwatch, "func": func, "logger": logger}
 
         exec(code, namespace)
 
