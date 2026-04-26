@@ -49,7 +49,6 @@ def calc_lpf_table(n: int, dtype: type[np.unsignedinteger] = np.uint32) -> LPF:
 
 
 # nの素因数分解を計算します
-@timeit
 def factorize(n: mpz, table: LPF) -> Factors:
     f = factors()
 
@@ -66,6 +65,7 @@ def factorize(n: mpz, table: LPF) -> Factors:
         # 最小素因数のテーブルより大きな値だった場合の処理
         # TODO 必要ならフォールバックの処理を書く
         f[n] += 1
+        print("n > len(table):", n)
     else:
         while n > 1:
             p = mpz(table[n // 2])

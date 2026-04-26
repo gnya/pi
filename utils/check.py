@@ -1,8 +1,6 @@
 import os
 from decimal import Decimal
 
-from .time import timeit
-
 PI_PATH = f"{os.path.dirname(__file__)}\\pi.txt"
 
 
@@ -19,7 +17,6 @@ def int_to_str(x: int, n: int = 0) -> str:
     return upper + lower
 
 
-@timeit
 def check_pi(proximate: Decimal | str | int) -> int:
     with open(PI_PATH) as f:
         prox_pi = str(proximate).replace(".", "")

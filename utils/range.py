@@ -1,8 +1,8 @@
-def split_range(size: int, parts: int) -> list[tuple[int, int]]:
+def split_range(start: int, end: int, parts: int) -> list[tuple[int, int]]:
     return [
         (
-            (size * n) // parts,
-            (size * (n + 1)) // parts - 1,
+            start + ((end - start) * n) // parts,
+            start + ((end - start) * (n + 1)) // parts,
         )
         for n in range(parts)
     ]

@@ -4,7 +4,7 @@ from multiprocessing import Pool
 import gmpy2
 from gmpy2 import mpfr, mpz
 
-from utils import check_pi, split_range, timeit
+from utils import check_pi, timeit
 
 PQT = tuple[mpz, mpz, mpz]
 
@@ -13,6 +13,17 @@ CONST_A = 545140134
 CONST_B = 13591409
 CONST_C = int(320160**3)
 CONST_D = 2 * CONST_C
+
+
+# utilsのなかにあった同名関数が置き換えられたのでここに定義しています
+def split_range(size: int, parts: int) -> list[tuple[int, int]]:
+    return [
+        (
+            (size * n) // parts,
+            (size * (n + 1)) // parts - 1,
+        )
+        for n in range(parts)
+    ]
 
 
 # この関数はアルゴリズムの分母分子の合成を行います
@@ -68,7 +79,8 @@ def merge_pqt_list(start: int, end: int, pqt_list: list[PQT]) -> PQT:
 
 # この関数はアルゴリズムの分母分子を並列で計算します
 # NOTE n_merge_jobsの値は特に理由がない限り2に設定するのが良さそう
-def calc_pqt(max_loop: int, n_jobs: int, n_merge_jobs: int) -> PQT:
+@timeit
+def calc_pqt_old(max_loop: int, n_jobs: int, n_merge_jobs: int) -> PQT:
     if n_jobs < 2:
         raise RuntimeError("processesには2以上の値を設定してください")
 
@@ -88,9 +100,9 @@ def calc_pqt(max_loop: int, n_jobs: int, n_merge_jobs: int) -> PQT:
 
 
 @timeit
-def calc_pi(digits: int, n_jobs: int) -> mpfr:
+def calc_pi_old(digits: int, n_jobs: int) -> mpfr:
     max_loop = int(digits / DIGITS_PER_ITER) + 5
-    _, q, t = calc_pqt(max_loop, n_jobs, 2)
+    _, q, t = calc_pqt_old(max_loop, n_jobs, 2)
 
     with gmpy2.context(precision=digits * 5):
         # 逆数平方根のほうが速い
@@ -101,7 +113,7 @@ def calc_pi(digits: int, n_jobs: int) -> mpfr:
 
 if __name__ == "__main__":
     # 1億桁の計算に40秒ほどかかる
-    pi = calc_pi(100000000, 8)
+    pi = calc_pi_old(100000000, 8)
 
     # 今の方法だと500万桁を超える円周率をチェックできない…
     print(f"digits: {check_pi(pi)}")
