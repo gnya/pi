@@ -1,2 +1,4 @@
 *.pyc
 settings.json
+test.*
+pi_*.txt
